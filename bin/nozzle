@@ -23,7 +23,7 @@ var basename = path.basename,
   readdir = fs.readdirSync;
 
 //version
-var version = '0.0.3';
+var version = '0.0.4';
 
 // root dir structure
 var SITE = 'site',
