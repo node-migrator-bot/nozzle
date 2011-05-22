@@ -8,6 +8,8 @@ Nozzle is a simple static site generator build on [node](http://nodejs.org). It 
 
 ## Command Line Interface
 
+Run these commands inside your site.
+
     $ nozzle g      Generates the site.
     $ nozzle s      Start the internal server to see your site.
 
@@ -20,6 +22,11 @@ Nozzle is a simple static site generator build on [node](http://nodejs.org). It 
 * config.yaml - Configuration file.
 
 ## Usage
+
+Create the site's basic structure.
+
+    mkdir -p yoursite/{content,public,layouts}
+    cd yoursite
 
 ## License
 
