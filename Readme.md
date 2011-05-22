@@ -1,6 +1,6 @@
 # Nozzle
 
-Nozzle is a simple static site generator build on node. It takes a bunch of Markdown files or Jade templates put them in a base Jade template and generates HTML files.
+Nozzle is a simple static site generator build on [node](http://nodejs.org). It takes a bunch of [markdown](http://daringfireball.net/projects/markdown/basics) files or [jade](http://jade-lang.com) templates put them in a base Jade template and generates HTML files.
 
 ## Install
 
@@ -16,7 +16,10 @@ Nozzle is a simple static site generator build on node. It takes a bunch of Mark
 * content - Files that will end up as pages.
 * layouts - Files that are used as base templates for content. 
 * public - Static files like css, js or images.
+* site - Automatically generated site. No need to create it yourself.
 * config.yaml - Configuration file.
+
+## Usage
 
 ## License
 
