@@ -23,7 +23,7 @@ var basename = path.basename,
   readdir = fs.readdirSync;
 
 //version
-var version = '0.0.2';
+var version = '0.0.3';
 
 // root dir structure
 var SITE = 'site',
@@ -103,7 +103,7 @@ function copyPublicFiles() {
 
 function getConfig() {
   if (!exists(CONFIG)) return {};
-  return yaml.eval(read(file, 'utf8'));
+  return yaml.eval(read(CONFIG, 'utf8'));
 }
 
 function save(page) {
