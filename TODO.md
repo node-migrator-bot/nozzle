@@ -1,1 +1,1 @@
-* Make sure page.url and page.collection can be reseted
+* Make sure page.url and page.collection are read-only
