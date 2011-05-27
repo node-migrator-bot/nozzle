@@ -1,52 +1,73 @@
 #!/usr/bin/env node
 
-//system dependencies
-var fs = require('fs'),
-  path = require('path'),
-  exec = require('child_process').exec;
+/**
+ * System dependencies.
+ */
 
-//dependencies
-var jade = require('jade'),
-  yaml = require('yaml'),
-  markdown = require('markdown').markdown;
+var fs = require('fs')
+  , path = require('path')
+  , exec = require('child_process').exec;
 
-//shortcuts
-var basename = path.basename,
-  dirname = path.dirname,
-  extname = path.extname,
-  join = path.join,
-  normalize = path.normalize,
-  exists = path.existsSync,
-  stat = fs.statSync,
-  read = fs.readFileSync,
-  write = fs.writeFileSync,
-  readdir = fs.readdirSync;
+/**
+ * Dependencies.
+ */
 
-//version
+var jade = require('jade')
+  , yaml = require('yaml')
+  , markdown = require('markdown').markdown;
+
+/** 
+ * Shortcuts.
+ */
+
+var basename = path.basename
+  , dirname = path.dirname
+  , extname = path.extname
+  , join = path.join
+  , normalize = path.normalize
+  , exists = path.existsSync
+  , stat = fs.statSync
+  , read = fs.readFileSync
+  , write = fs.writeFileSync
+  , readdir = fs.readdirSync;
+
+/**
+ * Version.
+ */
+
 var version = '0.0.4';
 
-// root dir structure
-var SITE = 'site',
-  CONTENT = 'content',
-  LAYOUTS = 'layouts',
-  PUBLIC = 'public',
-  CONFIG = 'config.yaml',
-  DEFAULT_LAYOUT = 'layout';
+/**
+ * Directory structure.
+ */
 
-//help
-var usage = ['',
-  '  Usage:',
-  '    nozzle g                 generate the site',
-  '    nozzle s                 start the server',
-  '',
-  '  Options:',
-  '    -v, --version            output framework version',
-  '    -h, --help               output help information',
-  ''
+var structure = { 
+    site: 'site'
+  , content: 'content'
+  , layouts: 'layouts'
+  , public: 'public'
+  , config: 'config.yaml'
+  , defaultLayout:  'layout' };
+
+/**
+ * Help.
+ */
+
+var usage = [''
+  , '  Usage:'
+  , '    nozzle g                 generate the site'
+  , '    nozzle s                 start the server'
+  , ''
+  , '  Options:'
+  , '    -v, --version            output framework version'
+  , '    -h, --help               output help information'
+  , ''
 ].join('\n');
 
+/**
+ * Parse arguments.
+ */
 
-// parse arguments
 var arg = process.argv.slice(2).shift();
 switch (arg) {
   case 'g':
@@ -67,7 +88,10 @@ switch (arg) {
     break;
 }
 
-//generate the site
+/**
+ * Generate the site.
+ */
+
 function generate() {
 
   //get global vars
@@ -87,32 +111,51 @@ function generate() {
   });
 }
 
+/**
+ * Recreate `structure.site` directory.
+ */
+
 function refresh(fn) {
-  if (!exists(SITE)) mkdir(SITE, fn);
-  rmdir(SITE, function() {
-    mkdir(SITE, fn);
+  if (!exists(structure.site)) mkdir(structure.site, fn);
+  rmdir(structure.site, function() {
+    mkdir(structure.site, fn);
   });  
 }
 
+/**
+ * Recreate `structure.site` directory.
+ */
+
 function copyPublicFiles() {
-  if(!exists(PUBLIC)) return;
-  var files = readdir(PUBLIC);
+  if(!exists(structure.public)) return;
+  var files = readdir(structure.public);
   if (!files.length) return;
-  cp(PUBLIC + '/*', SITE);
+  cp(structure.public + '/*', structure.site);
 }
+
+/**
+ * Go and read the `structure.config` file.
+ */
 
 function getConfig() {
-  if (!exists(CONFIG)) return {};
-  return yaml.eval(read(CONFIG, 'utf8'));
+  if (!exists(structure.config)) return {};
+  return yaml.eval(read(structure.config, 'utf8'));
 }
 
+/**
+ * Save the page.
+ */
+
 function save(page) {
-  mkdir(SITE + '/' + dirname(page.dest), function() {
-    write(SITE + '/' + page.dest, page.content);
+  mkdir(structure.site + '/' + dirname(page.dest), function() {
+    write(structure.site + '/' + page.dest, page.content);
   });
 }
 
-//colect pages by collection and exposte the collection as a site var
+/**
+ * Colect pages by collection and expose the collection as a site var.
+ */
+
 function groupPages(page, site) {
   var locals = page.locals, collection = locals.page.collection;
   if (!collection) return;
@@ -121,11 +164,14 @@ function groupPages(page, site) {
   return page;
 }
 
-//gather pages from path
+/**
+ * Get pages.
+ */
+
 function getPages(fn) {
   var pages = [];
 
-  if (!exists(CONTENT)) return pages;
+  if (!exists(structure.content)) return pages;
 
   (function _get(path, fn) {
     readdir(path).forEach(function(file) {
@@ -140,11 +186,14 @@ function getPages(fn) {
         fn && fn(page);
       }
     });
-  })(CONTENT, fn);
+  })(structure.content, fn);
 
   return pages;
 }
 
+/**
+ * Create the page and metadata from a `file`.
+ */
 
 function createPage(file) {
   //format of the file
@@ -160,37 +209,35 @@ function createPage(file) {
   var dirs = dirname(file).split('/');
 
   // destination path
-  var destDirname = dirs.slice(1).join('/');
-  var destBasename = title != 'index' ? title + '/index.html' : title + '.html';
-  var dest = join(destDirname, destBasename);
+  var destDirname = dirs.slice(1).join('/')
+    , destBasename = title != 'index' ? title + '/index.html' : title + '.html'
+    , dest = join(destDirname, destBasename);
 
   var url = normalize('/' + dirname(dest));
 
   var collection;
-  //get the collection (the 2nd directory i.e. CONTENT/[collection])
+  //get the collection (the 2nd directory i.e. Content/[collection])
   if (dirs.length>1) collection = dirs[1];
 
   //cut header for content if exists
-  var parts = getHeaderAndContent(content); 
-  header = parts.header;
-  content = parts.content;
+  var parts = getHeaderAndContent(content)
+    , header = parts.header
+    , content = parts.content;
 
-  var layout = existentLayout(collection) || existentLayout(DEFAULT_LAYOUT);
+  var layout = existentLayout(collection) || existentLayout(structure.defaultLayout);
 
   var page = { 
-    locals: {},
-    content: content,
-    layout: layout,
-    format: format,
-    dest: dest,
-    src: file
-  };
+      locals: {}
+    , content: content
+    , layout: layout
+    , format: format
+    , dest: dest
+    , src: file };
 
   page.locals.page = {
-    title: title,
-    url: url,
-    collection: collection
-  };
+      title: title
+    , url: url
+    , collection: collection };
 
   //get page header vars
   page.headerLayout = header.layout;
@@ -200,6 +247,9 @@ function createPage(file) {
   return page;
 }
 
+/**
+ * Split header from content.
+ */
 
 function getHeaderAndContent(content) {
   var header = {}, sep = '---', parts;
@@ -214,6 +264,9 @@ function getHeaderAndContent(content) {
   return {header: header, content: content};
 }
 
+/**
+ * Render the layout.
+ */
 
 function render(page, site) {
   var locals = page.locals, layoutPath, parts, header;
@@ -224,7 +277,7 @@ function render(page, site) {
     page.format = '.jade';
     //expose the content as a var in page
     locals.content = page.content;
-    layoutPath = join(LAYOUTS, page.layout + '.jade');
+    layoutPath = join(structure.layouts, page.layout + '.jade');
     //read the content of the layout
     page.content =  read(layoutPath, 'utf8');
     //cut the header for content and get layout's layout if any
@@ -232,7 +285,7 @@ function render(page, site) {
     header = parts.header;
     page.content = parts.content;
     page.headerLayout = header.layout;
-    page.layout = DEFAULT_LAYOUT;
+    page.layout = structure.defaultLayout;
 
     //finally, no more layouts to render
     if (page.done) page.layout = null;
@@ -249,23 +302,30 @@ function render(page, site) {
 
   if (page.layout) {
     page.isLayout = true;
-    page.done = page.layout == DEFAULT_LAYOUT;
+    page.done = page.layout == structure.defaultLayout;
     render(page, site); 
   } 
 
   return page;
 }
 
+/**
+ * Check if a layout file exists.
+ */
+
 function existentLayout(layout) {
-  if (exists(join(LAYOUTS, layout + '.jade'))) return layout; 
+  if (exists(join(structure.layouts, layout + '.jade'))) return layout; 
 }
 
-//start the server
+/**
+ * Start the server.
+ */
+
 function server(port) {
   //todo: check out if _site exist
   //console.log("Can't find _site directory. Run 'nozzle gen' to generate it.");
   var static = require('node-static');
-  var file = new(static.Server)(SITE);
+  var file = new(static.Server)(structure.site);
 
   require('http').createServer(function (req, res) {
     req.addListener('end', function () {
@@ -275,24 +335,38 @@ function server(port) {
   console.log('Serving files at http://localhost:' + port);
 }
 
-// helpers
+/**
+ * HELPERS.
+ */
 
-// mkdir -p.
+/** 
+ * Mkdir -p.
+ */
+
 function mkdir(path, fn) { 
   system('mkdir -p ' + path, fn); 
 }
 
-// rm -rf.
+/** Rm -rf.
+ *
+ */
+
 function rmdir(path, fn) { 
   system('rm -rf ' + path, fn); 
 }
 
-// cp -rf source target.
+/** 
+ * Cp -rf source target.
+ */
+
 function cp(source, target, fn) { 
   system('cp -rf ' + source + ' ' + target, fn); 
 }
 
-// execute system commands
+/**
+ * Execute system commands.
+ */
+
 function system(command, fn) {
   exec(command, function(err) {
     if (err) throw err;
@@ -300,13 +374,19 @@ function system(command, fn) {
   });
 }
 
-// exit with the given `str`.
+/**
+ * Exit with the given `str`.
+ */
+
 function abort(str) {
   console.error(str);
   process.exit(1);
 }
 
-// copies properties from one object to another
+/**
+ * Copies properties from one object to another.
+ */
+
 function apply(destination, source) {
   destination = destination || {};
   source = source || {};
