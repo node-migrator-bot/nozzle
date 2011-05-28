@@ -61,8 +61,7 @@ var usage = [''
   , '  Options:'
   , '    -v, --version            output framework version'
   , '    -h, --help               output help information'
-  , ''
-].join('\n');
+  , ''].join('\n');
 
 /**
  * Parse arguments.
@@ -101,11 +100,14 @@ function generate() {
     //site variable availabe in all pages
     var site = config.site || {};
 
-    //get the pages from FS and collect them in collections
-    var pages = getPages(function(page) { groupPages(page, site); });
+    var pages = getPages();
 
+    pages.forEach(function(page) { 
+    //group pages by collection
+     groupPages(page, site); 
     //render and save the page 
-    pages.forEach(function(page) { save(render(page, site)); });
+     save(render(page, site)); 
+    });
 
     copyPublicFiles(); 
   });
@@ -183,12 +185,14 @@ function getPages(fn) {
       } else if (fd.isFile()) {
         page = createPage(file);
         pages.push(page);
-        fn && fn(page);
       }
     });
   })(structure.content, fn);
 
-  return pages;
+  //order pages by date 
+  return pages.sort(function(a, b) {
+    return b.locals.page.date - a.locals.page.date;
+  });
 }
 
 /**
@@ -201,6 +205,9 @@ function createPage(file) {
 
   //title of the file 
   var title = basename(file, format);
+
+  //date of the file
+  var date = stat(file).mtime;
 
   //the actual content of the file
   var content = read(file, 'utf8');
@@ -236,6 +243,7 @@ function createPage(file) {
 
   page.locals.page = {
       title: title
+    , date: date
     , url: url
     , collection: collection };
 
