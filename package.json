@@ -1,5 +1,5 @@
 { "name": "nozzle"
-, "version": "0.0.4"
+, "version": "0.0.5"
 , "description": "Simple site generator"
 , "author": "Adrian Olaru <agolaru@gmail.com>"
 , "dependencies": { "markdown": ">= 0.2.1"

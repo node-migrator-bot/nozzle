@@ -1,3 +1,7 @@
+0.0.5 / 2011-05-28
+------------------
+* Order pages by date
+
 0.0.4 / 2011-05-22
 ------------------
 * Updated yaml lib dependency to 0.2.1
