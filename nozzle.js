@@ -102,12 +102,11 @@ function generate() {
 
     var pages = getPages();
 
-    pages.forEach(function(page) { 
     //group pages by collection
-     groupPages(page, site); 
+    pages.forEach(function(page) { groupPages(page, site); });
+
     //render and save the page 
-     save(render(page, site)); 
-    });
+    pages.forEach(function(page) { save(render(page, site)); });
 
     copyPublicFiles(); 
   });
