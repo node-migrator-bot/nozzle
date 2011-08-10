@@ -397,6 +397,8 @@ function abort(str) {
 function apply(destination, source) {
   destination = destination || {};
   source = source || {};
-  for (var i in source) if (source.hasOwnProperty(i)) destination[i] = source[i];
+  for (var i in source) {
+    if (source.hasOwnProperty(i)) destination[i] = source[i];
+  }
   return destination;
 }
